@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Tiles of India</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            padding: 40px;
+            min-height: 650px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .opening-screen {
+            text-align: center;
+        }
+
+        .opening-screen h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 22px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            padding: 25px;
+            border: 3px solid #667eea;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .filter-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .filter-btn .count {
+            display: block;
+            font-size: 14px;
+            font-weight: normal;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        .game-screen {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+
+        .word-info {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .tiles-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .tile {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, #f0f0f0, #d9d9d9);
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            animation: shuffle 0.6s ease;
+        }
+
+        @keyframes shuffle {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(-5deg); }
+            75% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        .input-container {
+            margin: 30px 0;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 18px;
+            font-size: 20px;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            transition: border-color 0.3s;
+            font-weight: bold;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .answer-input.correct {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .answer-input.incorrect {
+            border-color: #f44336;
+            background: #ffebee;
+            animation: shake 0.5s;
+        }
+
+        .answer-input.valid-not-indian {
+            border-color: #fbc02d;
+            background: #fff9c4;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #45a049;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .feedback {
+            text-align: center;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .feedback.correct {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+        }
+
+        .feedback.incorrect {
+            background: #ffebee;
+            border: 2px solid #f44336;
+        }
+
+        .feedback.show-answer {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+        }
+
+        .feedback h3 {
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .feedback.correct h3 {
+            color: #4caf50;
+        }
+
+        .feedback.incorrect h3 {
+            color: #f44336;
+        }
+
+        .feedback.show-answer h3 {
+            color: #ff9800;
+        }
+
+        .feedback .word {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 15px 0;
+            letter-spacing: 3px;
+        }
+
+        .feedback .definition {
+            color: #666;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        .feedback.valid-not-indian {
+            background: #fff9c4;
+            border: 2px solid #fbc02d;
+        }
+
+        .feedback.valid-not-indian h3 {
+            color: #f57f17;
+        }
+
+        .stats {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .tile {
+                width: 50px;
+                height: 50px;
+                font-size: 28px;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .answer-input {
+                font-size: 18px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    function App() {
+        const [allWords, setAllWords] = useState([]);
+        const [allValidWords, setAllValidWords] = useState(new Set());
+        const [loading, setLoading] = useState(true);
+        const [gameStarted, setGameStarted] = useState(false);
+        const [selectedLength, setSelectedLength] = useState(null);
+        const [currentWord, setCurrentWord] = useState(null);
+        const [shuffledLetters, setShuffledLetters] = useState([]);
+        const [userAnswer, setUserAnswer] = useState('');
+        const [feedback, setFeedback] = useState(null);
+        const [stats, setStats] = useState({ correct: 0, incorrect: 0, shown: 0 });
+        const [usedWords, setUsedWords] = useState({});
+
+        // Load words from files
+        useEffect(() => {
+            const timestamp = new Date().getTime(); 
+            Promise.all([
+                fetch('/indian_words.txt?v=' + timestamp).then(r => r.text()),
+                fetch('/all_words.txt?v=' + timestamp).then(r => r.text())
+            ]).then(([indianData, allData]) => {
+                // Parse Indian words
+                const lines = indianData.split('\n').filter(line => line.trim());
+                const words = lines.map(line => {
+                    const [word, definition] = line.split('\t');
+                    return {
+                        word: word?.trim(),
+                        definition: definition?.trim(),
+                        length: word?.trim().length
+                    };
+                }).filter(w => w.word && w.definition);
+                setAllWords(words);
+                console.log('Loaded words:', words.length);
+
+                // Parse all valid Scrabble words
+                const allWordsSet = new Set(
+                    allData.split('\n')
+                        .map(line => line.split('\t')[0]?.trim())
+                        .filter(w => w)
+                );
+                setAllValidWords(allWordsSet);
+                setLoading(false);
+            }).catch(err => {
+                console.error('Error loading words:', err);
+                setLoading(false);
+            });
+        }, []);
+
+        const wordCounts = useMemo(() => {
+            const counts = {};
+            allWords.forEach(w => {
+                counts[w.length] = (counts[w.length] || 0) + 1;
+            });
+            return counts;
+        }, [allWords]);
+
+        const lengthOptions = useMemo(() => {
+            return [3, 4, 5, 6, 7, 8, 9].filter(len => wordCounts[len] > 0);
+        }, [wordCounts]);
+
+        const shuffleArray = (array) => {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        };
+
+        const getRandomWord = (length) => {
+            const wordsOfLength = allWords.filter(w => w.length === length);
+            const usedSet = usedWords[length] || new Set();
+            
+            // Filter out used words
+            const availableWords = wordsOfLength.filter(w => !usedSet.has(w.word));
+            
+            // If all words used, reset for this length
+            if (availableWords.length === 0) {
+                setUsedWords(prev => ({ ...prev, [length]: new Set() }));
+                return wordsOfLength[Math.floor(Math.random() * wordsOfLength.length)];
+            }
+            
+            return availableWords[Math.floor(Math.random() * availableWords.length)];
+        };
+
+        const startGame = (length) => {
+            setSelectedLength(length);
+            setGameStarted(true);
+            setUsedWords(prev => ({ ...prev, [length]: new Set() }));
+            loadNewWord(length);
+        };
+
+        const loadNewWord = (length) => {
+            // Check if we've exhausted all words FIRST
+            const wordsOfLength = allWords.filter(w => w.length === length);
+            const usedSet = usedWords[length] || new Set();
+            
+            if (usedSet.size >= wordsOfLength.length) {
+                setFeedback({ 
+                    type: 'all-done',
+                    totalWords: wordsOfLength.length
+                });
+                setCurrentWord(null);
+                return;
+            }
+            
+            const word = getRandomWord(length);
+            setCurrentWord(word);
+            setShuffledLetters(shuffleArray(word.word.split('')));
+            setUserAnswer('');
+            setFeedback(null);
+            
+            // Mark word as used
+            setUsedWords(prev => ({
+                ...prev,
+                [length]: new Set([...(prev[length] || []), word.word])
+            }));
+        };
+
+        const handleCheck = () => {
+            const answer = userAnswer.toUpperCase();
+            
+            if (answer === currentWord.word) {
+                // Correct Indian word
+                setFeedback({ 
+                    type: 'correct', 
+                    word: currentWord.word, 
+                    definition: currentWord.definition 
+                });
+                setStats(prev => ({ ...prev, correct: prev.correct + 1 }));
+            } else if (allValidWords.has(answer) && answer.length === currentWord.word.length) {
+                // Valid Scrabble word but not the Indian one - FIX #2
+                setFeedback({ 
+                    type: 'valid-not-indian',
+                    userWord: answer
+                });
+            } else {
+                // Completely incorrect
+                setFeedback({ type: 'incorrect' });
+                setStats(prev => ({ ...prev, incorrect: prev.incorrect + 1 }));
+            }
+        };
+
+        const handleTryAgain = () => {
+            setUserAnswer('');
+            setFeedback(null);
+        };
+
+        const handleShowAnswer = () => {
+            setFeedback({ 
+                type: 'show-answer', 
+                word: currentWord.word, 
+                definition: currentWord.definition 
+            });
+            setStats(prev => ({ ...prev, shown: prev.shown + 1 }));
+        };
+
+        const handleNextWord = () => {
+            loadNewWord(selectedLength);
+        };
+
+        const handleBackToMenu = () => {
+            setGameStarted(false);
+            setSelectedLength(null);
+            setCurrentWord(null);
+            setFeedback(null);
+        };
+
+        if (loading) {
+            return (
+                <div className="container">
+                    <h1>🇮🇳 Loading...</h1>
+                    <p className="subtitle">Preparing your words...</p>
+                </div>
+            );
+        }
+
+        if (feedback && feedback.type === 'all-done') {
+            return (
+                <div className="container">
+                    <button className="back-btn" onClick={handleBackToMenu}>
+                        ← Back to Menu
+                    </button>
+
+                    <h1>The Tiles of India</h1>
+                    <p className="subtitle">{selectedLength}-letter words</p>
+
+                    <div className="feedback all-done">
+                        <h3>🎉 You've completed all {feedback.totalWords} words!</h3>
+                        <p>Great job! You've seen every {selectedLength}-letter word.</p>
+                        <div className="buttons" style={{marginTop: '20px'}}>
+                            <button 
+                                className="btn btn-primary"
+                                onClick={() => {
+                                    setUsedWords(prev => ({ ...prev, [selectedLength]: new Set() }));
+                                    loadNewWord(selectedLength);
+                                }}
+                            >
+                                Start Over (Same Length)
+                            </button>
+                            <button 
+                                className="btn btn-secondary"
+                                onClick={handleBackToMenu}
+                            >
+                                Back to Menu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        if (!gameStarted) {
+            return (
+                <div className="container">
+                    <h1>The Tiles of India</h1>
+                    
+                    <div className="opening-screen">
+                        <h2>Choose word length to practice:</h2>
+                        <div className="filter-grid">
+                            {lengthOptions.map(length => (
+                                <button
+                                    key={length}
+                                    className="filter-btn"
+                                    onClick={() => startGame(length)}
+                                >
+                                    {length} Letters
+                                    <span className="count">({wordCounts[length]} words)</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="container">
+                <button className="back-btn" onClick={handleBackToMenu}>
+                    ← Back to Menu
+                </button>
+
+                <h1>The Tiles of India</h1>
+                <p className="subtitle">{selectedLength}-letter words</p>
+
+                <div className="game-screen">
+                    <div className="word-info">
+                        Unscramble the word below
+                    </div>
+
+                    <div className="tiles-container">
+                        {shuffledLetters.map((letter, index) => (
+                            <div key={index} className="tile">
+                                {letter}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="input-container">
+                        <input
+                            type="text"
+                            className={`answer-input ${feedback ? feedback.type : ''}`}
+                            value={userAnswer}
+                            onChange={(e) => setUserAnswer(e.target.value)}
+                            placeholder="Type your answer..."
+                            disabled={feedback && feedback.type !== 'incorrect' && feedback.type !== 'valid-not-indian'}
+                            maxLength={currentWord.word.length}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter' && userAnswer.length > 0) {
+                                    // FIX #3: Enter key behavior
+                                    // If no feedback or incorrect/valid-not-indian, check answer
+                                    if (!feedback || feedback.type === 'incorrect' || feedback.type === 'valid-not-indian') {
+                                        handleCheck();
+                                    }
+                                    // If correct or show-answer, go to next word
+                                    else if (feedback.type === 'correct' || feedback.type === 'show-answer') {
+                                        handleNextWord();
+                                    }
+                                }
+                            }}
+                        />
+                    </div>
+
+                    <div className="buttons">
+                        {(!feedback || feedback.type === 'incorrect' || feedback.type === 'valid-not-indian') && (
+                            <>
+                                <button 
+                                    className="btn btn-primary"
+                                    onClick={handleCheck}
+                                    disabled={userAnswer.length === 0}
+                                >
+                                    Check Answer
+                                </button>
+                                <button 
+                                    className="btn btn-secondary"
+                                    onClick={handleShowAnswer}
+                                >
+                                    Show Answer
+                                </button>
+                            </>
+                        )}
+                        
+                        {feedback && (feedback.type === 'incorrect' || feedback.type === 'valid-not-indian') && (
+                            <button 
+                                className="btn btn-secondary"
+                                onClick={handleTryAgain}
+                            >
+                                Clear & Try Again
+                            </button>
+                        )}
+                        
+                        {feedback && (feedback.type === 'correct' || feedback.type === 'show-answer') && (
+                            <button 
+                                className="btn btn-success"
+                                onClick={handleNextWord}
+                            >
+                                Next Word →
+                            </button>
+                        )}
+                    </div>
+
+                    {feedback && (
+                        <div className={`feedback ${feedback.type}`}>
+                            {feedback.type === 'correct' && (
+                                <>
+                                    <h3>✓ Correct!</h3>
+                                    <div className="word">{feedback.word}</div>
+                                    <div className="definition">{feedback.definition}</div>
+                                </>
+                            )}
+                            {feedback.type === 'incorrect' && (
+                                <>
+                                    <h3>✗ Incorrect</h3>
+                                    <p>Try again!</p>
+                                </>
+                            )}
+                            {feedback.type === 'valid-not-indian' && (
+                                <>
+                                    <h3>⚠️ Valid word, but not the Indian one!</h3>
+                                    <p>Your answer: <strong>{feedback.userWord}</strong></p>
+                                </>
+                            )}
+                            {feedback.type === 'show-answer' && (
+                                <>
+                                    <h3>The answer is:</h3>
+                                    <div className="word">{feedback.word}</div>
+                                    <div className="definition">{feedback.definition}</div>
+                                </>
+                            )}
+                        </div>
+                    )}
+
+                    <div className="stats">
+                        ✓ Correct: {stats.correct} | ✗ Incorrect: {stats.incorrect} | 👁 Shown: {stats.shown}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>
