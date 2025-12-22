@@ -16,7 +16,7 @@ export function ThreeBackground() {
     const gl = canvas.getContext('webgl') || canvas.getContext('webgl2')
     if (!gl) {
       console.warn('WebGL not available, using CSS fallback')
-      mount.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'
+      mount.style.background = '#0a0a0a'
       return
     }
 
@@ -151,8 +151,8 @@ export function ThreeBackground() {
       }
     } catch (error) {
       console.error('Failed to create WebGL context:', error)
-      // Fallback to CSS gradient
-      mount.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'
+      // Fallback to black background
+      mount.style.background = '#0a0a0a'
       if (renderer && mount && renderer.domElement) {
         try {
           mount.removeChild(renderer.domElement)
