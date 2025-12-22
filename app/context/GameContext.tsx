@@ -94,7 +94,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       fetch(`/non_hindi_anagrams.json?v=${timestamp}`).then(r => r.json())
     ]).then(([indianData, allData, nonHindiAnagrams]) => {
       // Create a map of Hindi word -> non-Hindi anagrams array
-      const nonHindiMap = new Map(
+      const nonHindiMap = new Map<string, Array<{ word: string; definition: string }>>(
         nonHindiAnagrams.map((item: any) => [
           item.hindi_word,
           item.non_hindi_anagrams
