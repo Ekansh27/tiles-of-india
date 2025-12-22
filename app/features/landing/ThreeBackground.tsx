@@ -11,6 +11,15 @@ export function ThreeBackground() {
     const mount = mountRef.current
     let renderer: THREE.WebGLRenderer | null = null
 
+    // Check if WebGL is available
+    const canvas = document.createElement('canvas')
+    const gl = canvas.getContext('webgl') || canvas.getContext('webgl2')
+    if (!gl) {
+      console.warn('WebGL not available, using CSS fallback')
+      mount.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'
+      return
+    }
+
     try {
       const scene = new THREE.Scene()
       const camera = new THREE.PerspectiveCamera(
@@ -142,8 +151,15 @@ export function ThreeBackground() {
       }
     } catch (error) {
       console.error('Failed to create WebGL context:', error)
-      if (renderer && mount && renderer.domElement)
-        mount.removeChild(renderer.domElement)
+      // Fallback to CSS gradient
+      mount.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'
+      if (renderer && mount && renderer.domElement) {
+        try {
+          mount.removeChild(renderer.domElement)
+        } catch (e) {
+          // Element may not be appended yet
+        }
+      }
     }
   }, [])
 
