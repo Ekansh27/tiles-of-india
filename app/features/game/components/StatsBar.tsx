@@ -12,7 +12,7 @@ export function StatsBar() {
 
   return (
     <div className="stats-bar">
-      Correct: {sessionStats.correct} • Incorrect: {sessionStats.incorrect}
+      This Session: Correct: {sessionStats.correct} • Incorrect: {sessionStats.incorrect}
       {totalAttempts > 0 && (
         <> • Accuracy: {accuracy}%</>
       )}

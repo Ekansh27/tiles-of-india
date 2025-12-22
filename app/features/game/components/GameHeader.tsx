@@ -35,11 +35,29 @@ export function GameHeader() {
 
         <div style={{
           fontSize: '0.85rem',
-          color: boxTransition ? '#10b981' : 'var(--text-secondary)',
+          color: boxTransition
+            ? boxTransition.to > boxTransition.from
+              ? '#10b981'  // Green for moving up
+              : boxTransition.to < boxTransition.from
+                ? '#ef4444'  // Red for moving down
+                : '#eab308'  // Yellow for staying
+            : 'var(--text-secondary)',
           padding: '0.4rem 0.8rem',
-          background: boxTransition ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.05)',
+          background: boxTransition
+            ? boxTransition.to > boxTransition.from
+              ? 'rgba(16, 185, 129, 0.1)'  // Green background for up
+              : boxTransition.to < boxTransition.from
+                ? 'rgba(239, 68, 68, 0.1)'  // Red background for down
+                : 'rgba(234, 179, 8, 0.1)'  // Yellow background for staying
+            : 'rgba(255,255,255,0.05)',
           borderRadius: '6px',
-          border: boxTransition ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(255,255,255,0.1)',
+          border: boxTransition
+            ? boxTransition.to > boxTransition.from
+              ? '1px solid rgba(16, 185, 129, 0.3)'  // Green border for up
+              : boxTransition.to < boxTransition.from
+                ? '1px solid rgba(239, 68, 68, 0.3)'  // Red border for down
+                : '1px solid rgba(234, 179, 8, 0.3)'  // Yellow border for staying
+            : '1px solid rgba(255,255,255,0.1)',
           transition: 'all 0.3s ease'
         }}>
           {boxTransition ? `Box ${boxTransition.from} → ${boxTransition.to}` : `Box ${currentBoxNumber}`}

@@ -49,20 +49,60 @@ export function createWordQueue(
     boxes[boxNumber].push(group)
   })
 
-  // Select words: 9 from box 0, 4 from box 1, 3 from box 2, 2 from box 3, 1 from box 4, 1 from box 5
-  const distribution = [9, 4, 3, 2, 1, 1]
+  // Select words: 7 from box 0, 4 from box 1, 4 from box 2, 3 from box 3, 1 from box 4, 1 from box 5
+  const distribution = [7, 4, 4, 3, 1, 1]
   const selectedGroups: Word[][] = []
+  const buriedAnagramKeys = new Set<string>() // Track anagram families to avoid
+
+  // Helper to check if an anagram key is too similar to already selected ones
+  const isTooSimilar = (anagramKey: string): boolean => {
+    // Get the base pattern (without trailing 'S')
+    const baseKey = anagramKey.endsWith('S') ? anagramKey.slice(0, -1) : anagramKey
+
+    // Check if we've already selected this base or its plural
+    if (buriedAnagramKeys.has(baseKey) || buriedAnagramKeys.has(baseKey + 'S')) {
+      return true
+    }
+
+    return false
+  }
 
   for (let boxNum = 0; boxNum < 6; boxNum++) {
     const shuffledBox = shuffleArray(boxes[boxNum])
     const needed = distribution[boxNum]
-    const taken = shuffledBox.slice(0, needed)
+    const taken: Word[][] = []
+
+    // Filter out similar words and take what we need
+    for (const group of shuffledBox) {
+      if (taken.length >= needed) break
+
+      const anagramKey = group[0].word.split('').sort().join('')
+
+      if (!isTooSimilar(anagramKey)) {
+        taken.push(group)
+        buriedAnagramKeys.add(anagramKey)
+      }
+    }
+
     selectedGroups.push(...taken)
 
     // If we didn't get enough from this box, pull extras from box 0
     if (taken.length < needed && boxNum > 0) {
       const shortage = needed - taken.length
-      const extras = shuffleArray(boxes[0]).slice(0, shortage)
+      const shuffledBox0 = shuffleArray(boxes[0])
+      const extras: Word[][] = []
+
+      for (const group of shuffledBox0) {
+        if (extras.length >= shortage) break
+
+        const anagramKey = group[0].word.split('').sort().join('')
+
+        if (!isTooSimilar(anagramKey)) {
+          extras.push(group)
+          buriedAnagramKeys.add(anagramKey)
+        }
+      }
+
       selectedGroups.push(...extras)
     }
   }

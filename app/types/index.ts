@@ -2,15 +2,23 @@ export interface Word {
   word: string
   definition: string
   length: number
+  nonHindiAnagrams?: Array<{
+    word: string
+    definition: string
+  }>
 }
 
 export interface FeedbackState {
-  type: 'correct' | 'incorrect' | 'valid-not-indian' | 'show-answer' | 'all-done'
+  type: 'correct' | 'incorrect' | 'valid-not-indian' | 'show-answer' | 'all-done' | 'not-anagram'
   word?: string
   definition?: string
   userWord?: string
   allWords?: Word[]
   totalWords?: number
+  nonHindiAnagrams?: Array<{
+    word: string
+    definition: string
+  }>
 }
 
 export interface SessionStats {

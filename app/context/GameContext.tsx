@@ -79,6 +79,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [totalAnagramGroups, setTotalAnagramGroups] = useState(0)
   const [currentAnagramGroupNumber, setCurrentAnagramGroupNumber] = useState(1)
   const [currentBoxNumber, setCurrentBoxNumber] = useState<number>(0)
+  const [originalAnagramCount, setOriginalAnagramCount] = useState(0)
+  const [currentGroupAttempts, setCurrentGroupAttempts] = useState(0)
 
   // Cardbox hook
   const { cardboxData, updateCardbox, getBoxNumber } = useCardbox()
@@ -88,16 +90,27 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const timestamp = new Date().getTime()
     Promise.all([
       fetch(`/indian_words.txt?v=${timestamp}`).then(r => r.text()),
-      fetch(`/all_words.txt?v=${timestamp}`).then(r => r.text())
-    ]).then(([indianData, allData]) => {
+      fetch(`/all_words.txt?v=${timestamp}`).then(r => r.text()),
+      fetch(`/non_hindi_anagrams.json?v=${timestamp}`).then(r => r.json())
+    ]).then(([indianData, allData, nonHindiAnagrams]) => {
+      // Create a map of Hindi word -> non-Hindi anagrams array
+      const nonHindiMap = new Map(
+        nonHindiAnagrams.map((item: any) => [
+          item.hindi_word,
+          item.non_hindi_anagrams
+        ])
+      )
+
       // Parse Indian words
       const lines = indianData.split('\n').filter(line => line.trim())
       const words: Word[] = lines.map(line => {
         const [word, definition] = line.split('\t')
+        const wordTrimmed = word?.trim()
         return {
-          word: word?.trim(),
+          word: wordTrimmed,
           definition: definition?.trim(),
-          length: word?.trim().length
+          length: wordTrimmed?.length,
+          nonHindiAnagrams: nonHindiMap.get(wordTrimmed)
         }
       }).filter(w => w.word && w.definition)
       setAllWords(words)
@@ -157,6 +170,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setFeedback(null)
     setFoundWords([])
     setGroupMarkedIncorrect(false)
+    setOriginalAnagramCount(firstGroup.length) // Track original total
+    setCurrentGroupAttempts(0) // Reset attempts counter
   }
 
   const loadWordFromQueue = (index: number) => {
@@ -184,7 +199,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setFeedback(null)
     setFoundWords([])
     setGroupMarkedIncorrect(false)
-    setBoxTransition(null)
+    setBoxTransition(null) // Clear transition for new word
+    setOriginalAnagramCount(group.length) // Track original total
+    setCurrentGroupAttempts(0) // Reset attempts counter
   }
 
   const handleScramble = () => {
@@ -217,6 +234,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (!currentWordSet) return
 
     const answer = userAnswer.toUpperCase()
+
+    // Increment attempts for this group
+    setCurrentGroupAttempts(prev => prev + 1)
+
+    // First check: Is the answer an anagram of the scrambled letters?
+    const scrambledSorted = shuffledLetters.join('').toUpperCase().split('').sort().join('')
+    const answerSorted = answer.split('').sort().join('')
+
+    if (scrambledSorted !== answerSorted) {
+      // Not a valid anagram of the current letters - don't count as attempt (reading error)
+      setCurrentGroupAttempts(prev => prev - 1)
+      setFeedback({
+        type: 'not-anagram',
+        userWord: answer
+      })
+      return
+    }
+
     const matchedWord = currentWordSet.find(w => w.word === answer)
 
     if (matchedWord) {
@@ -231,10 +266,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
           correct: prev.correct + 1,
           wordsReviewed: new Set([...prev.wordsReviewed, matchedWord.word])
         }))
-
-        // Show box transition
-        const newBox = Math.min(currentBoxNumber + 1, 5)
-        setBoxTransition({ from: currentBoxNumber, to: newBox })
       } else {
         setSessionStats(prev => ({
           ...prev,
@@ -253,7 +284,30 @@ export function GameProvider({ children }: { children: ReactNode }) {
       })
 
       setUserAnswer('')
+
+      // If all anagrams found, calculate and show box transition
+      if (remaining.length === 0) {
+        const foundAllAnagrams = newFoundWords.length === originalAnagramCount
+        const accuracy = currentGroupAttempts + 1 > 0 ? newFoundWords.length / (currentGroupAttempts + 1) : 0
+        const referenceWord = newFoundWords[0]
+        const currentSorted = referenceWord?.word.split('').sort().join('')
+
+        if (currentSorted && selectedLength) {
+          const transition = updateCardbox(selectedLength, currentSorted, foundAllAnagrams, false, accuracy)
+          setBoxTransition(transition)
+        }
+      }
     } else if (allValidWords.has(answer) && answer.length === currentWordSet[0].word.length) {
+      // Check if this is a non-Hindi anagram
+      const isNonHindiAnagram = currentWordSet.some(w =>
+        w.nonHindiAnagrams?.some(anagram => anagram.word === answer)
+      )
+
+      // If it's a non-Hindi anagram, don't count it as an attempt
+      if (isNonHindiAnagram) {
+        setCurrentGroupAttempts(prev => prev - 1)
+      }
+
       setFeedback({
         type: 'valid-not-indian',
         userWord: answer
@@ -285,8 +339,20 @@ export function GameProvider({ children }: { children: ReactNode }) {
         type: 'show-answer',
         word: allAnagrams[0]?.word,
         definition: allAnagrams[0]?.definition,
-        allWords: allAnagrams.length > 1 ? allAnagrams : undefined
+        allWords: allAnagrams.length > 1 ? allAnagrams : undefined,
+        nonHindiAnagrams: allAnagrams[0]?.nonHindiAnagrams
       })
+
+      // Calculate and show box transition when showing answer
+      const foundAllAnagrams = false // Clicked show answer means didn't find all
+      const accuracy = currentGroupAttempts > 0 ? foundWords.length / currentGroupAttempts : 0
+      const referenceWord = allAnagrams[0]
+      const currentSorted = referenceWord?.word.split('').sort().join('')
+
+      if (currentSorted && selectedLength) {
+        const transition = updateCardbox(selectedLength, currentSorted, foundAllAnagrams, true, accuracy)
+        setBoxTransition(transition)
+      }
     }
 
     if (!groupMarkedIncorrect) {
@@ -296,17 +362,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }
 
   const handleNextWord = () => {
-    const referenceWord = currentWordSet?.[0] || foundWords[0]
-    const currentSorted = referenceWord?.word.split('').sort().join('')
-
-    const totalAnagrams = foundWords.length + (currentWordSet?.length || 0)
-    const foundAll = foundWords.length === totalAnagrams && feedback?.type !== 'show-answer'
-
-    // Update cardbox
-    if (currentSorted && selectedLength) {
-      updateCardbox(selectedLength, currentSorted, foundAll)
-    }
-
+    // Just move to next word - transition was already calculated in handleCheck or handleShowAnswer
     const nextIndex = currentWordIndex + 1
     setCurrentWordIndex(nextIndex)
 

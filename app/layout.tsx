@@ -5,8 +5,8 @@ import './globals.css'
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Tiles of India | South Asian Scrabble Trainer",
-  description: "Master South Asian words for competitive Scrabble",
+  title: "Tiles of India",
+  description: "Master Indian words for competitive Scrabble",
 }
 
 export default function RootLayout({

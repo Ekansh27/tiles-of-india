@@ -4,7 +4,9 @@
       "Bash(mv:*)",
       "Bash(uv venv:*)",
       "Bash(.venv/Scripts/python.exe -m pip install:*)",
-      "Bash(uv pip install:*)"
+      "Bash(uv pip install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []

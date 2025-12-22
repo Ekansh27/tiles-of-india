@@ -8,6 +8,7 @@
   --panel-border: rgba(60, 60, 60, 0.4);
   --text-primary: #f0f0f0;
   --text-secondary: #a3a3a3;
+  --text-tertiary: #808080;
 }
 
 * {

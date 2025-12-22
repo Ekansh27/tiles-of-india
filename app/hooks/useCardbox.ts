@@ -28,19 +28,38 @@ export function useCardbox() {
   const updateCardbox = (
     wordLength: number,
     anagramKey: string,
-    foundAll: boolean
+    foundAllAnagrams: boolean,
+    clickedShowAnswer: boolean,
+    accuracy: number
   ) => {
     const currentProgress = cardboxData[wordLength] || {}
     const currentBox = currentProgress[anagramKey] ?? 0
 
+    console.log('Box Update:', {
+      anagramKey,
+      currentBox,
+      foundAllAnagrams,
+      clickedShowAnswer,
+      accuracy: (accuracy * 100).toFixed(1) + '%'
+    })
+
     let newBox: number
-    if (foundAll) {
-      // Move up (max box 5)
+
+    if (clickedShowAnswer || !foundAllAnagrams) {
+      // Move DOWN: Clicked "Show Answer" OR didn't find all anagrams
+      newBox = Math.max(currentBox - 1, 0)
+    } else if (accuracy === 1.0) {
+      // Move UP: Got all anagrams with 100% accuracy
       newBox = Math.min(currentBox + 1, 5)
+    } else if (accuracy >= 0.66) {
+      // Stay: Got all anagrams with ≥66% accuracy
+      newBox = currentBox
     } else {
-      // Move down (min box 0)
+      // Move DOWN: Got all anagrams with <66% accuracy
       newBox = Math.max(currentBox - 1, 0)
     }
+
+    console.log('Box Movement:', { from: currentBox, to: newBox })
 
     const updatedProgress = {
       ...currentProgress,
