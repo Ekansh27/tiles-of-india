@@ -1,5 +1,6 @@
 'use client'
 
+import { useRef, useEffect } from 'react'
 import { useGame } from '../../../context/GameContext'
 
 export function AnswerInput() {
@@ -14,6 +15,27 @@ export function AnswerInput() {
     handleNextWord
   } = useGame()
 
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Refocus input after feedback or next word
+  useEffect(() => {
+    if (feedback?.type === 'correct' || feedback?.type === 'incorrect' || feedback?.type === 'valid-not-indian') {
+      // Small delay to allow feedback to render, then refocus
+      setTimeout(() => {
+        inputRef.current?.focus()
+      }, 100)
+    }
+  }, [feedback])
+
+  // Focus input when new word loads
+  useEffect(() => {
+    if (currentWordSet && currentWordSet.length > 0 && !feedback) {
+      setTimeout(() => {
+        inputRef.current?.focus()
+      }, 100)
+    }
+  }, [currentWordSet, feedback])
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       if (feedback?.type === 'show-answer' || !currentWordSet || currentWordSet.length === 0) {
@@ -26,11 +48,17 @@ export function AnswerInput() {
     }
   }
 
+  const handleNextClick = () => {
+    handleNextWord()
+    // Focus will be triggered by the useEffect when currentWordSet changes
+  }
+
   const isReadOnly = feedback?.type === 'show-answer' || !currentWordSet || currentWordSet.length === 0
 
   return (
     <div className="answer-row">
       <input
+        ref={inputRef}
         type="text"
         value={userAnswer}
         onChange={(e) => {
@@ -51,7 +79,7 @@ export function AnswerInput() {
 
       {(feedback?.type === 'show-answer' || (currentWordSet && currentWordSet.length === 0)) && (
         <button
-          onClick={handleNextWord}
+          onClick={handleNextClick}
           className="action-button success inline-next"
         >
           Next Word &rarr;
