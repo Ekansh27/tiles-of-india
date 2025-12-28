@@ -348,6 +348,7 @@ body {
   justify-content: center;
   gap: 10px; /* small gap so icon sits ~10px from tiles */
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .tile-animated {
@@ -367,6 +368,7 @@ body {
   transition: transform 0.2s ease, opacity 0.2s ease;
   cursor: grab;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .tile-animated:active {
@@ -889,15 +891,19 @@ body {
   }
 
   .tile-animated {
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 1.2rem;
-    gap: 0.5rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.1rem;
+    gap: 0.4rem;
   }
 
   .tiles-container {
-    gap: 0.5rem;
+    gap: 0.4rem;
     margin: 1.5rem 0;
+  }
+
+  .tiles-and-scramble {
+    gap: 8px;
   }
 
   .scramble-icon {
@@ -1011,9 +1017,17 @@ body {
   }
 
   .tile-animated {
-    width: 2.2rem;
-    height: 2.2rem;
-    font-size: 1.1rem;
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+  }
+
+  .tiles-container {
+    gap: 0.35rem;
+  }
+
+  .tiles-and-scramble {
+    gap: 6px;
   }
 
   .answer-input.small {
