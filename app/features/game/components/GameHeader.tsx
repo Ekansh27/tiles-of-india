@@ -13,7 +13,7 @@ export function GameHeader() {
   } = useGame()
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+    <div className="game-header">
       <button
         onClick={handleBackToMenu}
         className="back-button"
@@ -21,20 +21,16 @@ export function GameHeader() {
         <ArrowLeft size={20} /> Back to Menu
       </button>
 
-      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-        <div style={{
-          fontSize: '0.85rem',
+      <div className="game-stats">
+        <div className="stat-badge" style={{
           color: 'var(--text-secondary)',
-          padding: '0.4rem 0.8rem',
           background: 'rgba(255,255,255,0.05)',
-          borderRadius: '6px',
           border: '1px solid rgba(255,255,255,0.1)'
         }}>
           Word {currentAnagramGroupNumber}/{totalAnagramGroups}
         </div>
 
-        <div style={{
-          fontSize: '0.85rem',
+        <div className="stat-badge" style={{
           color: boxTransition
             ? boxTransition.to > boxTransition.from
               ? '#10b981'  // Green for moving up
@@ -42,7 +38,6 @@ export function GameHeader() {
                 ? '#ef4444'  // Red for moving down
                 : '#eab308'  // Yellow for staying
             : 'var(--text-secondary)',
-          padding: '0.4rem 0.8rem',
           background: boxTransition
             ? boxTransition.to > boxTransition.from
               ? 'rgba(16, 185, 129, 0.1)'  // Green background for up
@@ -50,7 +45,6 @@ export function GameHeader() {
                 ? 'rgba(239, 68, 68, 0.1)'  // Red background for down
                 : 'rgba(234, 179, 8, 0.1)'  // Yellow background for staying
             : 'rgba(255,255,255,0.05)',
-          borderRadius: '6px',
           border: boxTransition
             ? boxTransition.to > boxTransition.from
               ? '1px solid rgba(16, 185, 129, 0.3)'  // Green border for up
