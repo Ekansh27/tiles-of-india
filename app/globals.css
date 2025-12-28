@@ -940,9 +940,9 @@ body {
     flex: 0 0 200px;
     max-width: 68%;
     min-width: 140px;
-    font-size: 0.9rem;
+    font-size: 16px;
     padding: 0.5rem 0.6rem;
-    height: 36px;
+    height: 38px;
     letter-spacing: 0.05rem;
   }
 
@@ -1018,7 +1018,7 @@ body {
 
   .answer-input.small {
     flex: 0 0 150px;
-    font-size: 0.9rem;
+    font-size: 16px;
   }
 
   .back-button {
